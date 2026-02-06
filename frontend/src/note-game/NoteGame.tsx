@@ -18,6 +18,9 @@ type AnswerState =
   | { state: 'idle' }
   | { state: 'correct'; chosen: NaturalNoteLetter }
   | { state: 'wrong'; chosen: NaturalNoteLetter; correct: NaturalNoteLetter }
+type GameMode = 'single' | 'preview'
+type NoteQueue = readonly Note[]
+const BATCH_SIZE = 5
 
 function generateNaturalRange(start: Note, end: Note): readonly Note[] {
   const startMidi = noteToMidi(start)
@@ -45,6 +48,7 @@ const RANGE_LABELS: Record<Clef, string> = {
   treble: 'A3 〜 E6',
   bass: 'A1 〜 E4',
 }
+const ANSWER_BUTTONS: readonly NaturalNoteLetter[] = [...NOTE_LETTERS, 'C']
 
 function nextRandomNote(notePool: readonly Note[], prev?: Note): Note {
   if (!prev) return randomFrom(notePool)
@@ -53,17 +57,30 @@ function nextRandomNote(notePool: readonly Note[], prev?: Note): Note {
   return randomFrom(candidates)
 }
 
+function createQueue(notePool: readonly Note[], count: number): NoteQueue {
+  const notes: Note[] = []
+  notes.push(nextRandomNote(notePool))
+  while (notes.length < count) {
+    notes.push(nextRandomNote(notePool, notes[notes.length - 1]))
+  }
+  return notes
+}
+
 export function NoteGame() {
   const [nameStyle, setNameStyle] = useState<NoteNameStyle>('solfege')
   const [clef, setClef] = useState<Clef>('treble')
+  const [gameMode, setGameMode] = useState<GameMode>('single')
+  const [batchIndex, setBatchIndex] = useState(0)
   const notePool = useMemo(() => NOTE_POOLS[clef], [clef])
-  const [current, setCurrent] = useState<Note>(() => randomFrom(NOTE_POOLS.treble))
+  const [queue, setQueue] = useState<NoteQueue>(() => createQueue(NOTE_POOLS.treble, BATCH_SIZE))
   const [answer, setAnswer] = useState<AnswerState>({ state: 'idle' })
   const [correctCount, setCorrectCount] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
   const [streak, setStreak] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
   const pendingAdvanceTimer = useRef<number | undefined>(undefined)
+  const currentNote = gameMode === 'preview' ? queue[batchIndex] : queue[0]
+  const currentLetter = currentNote.letter
 
   const accuracy = useMemo(() => {
     if (totalCount === 0) return 0
@@ -79,29 +96,42 @@ export function NoteGame() {
   const advance = useCallback(() => {
     clearPendingAdvance()
     setAnswer({ state: 'idle' })
-    setCurrent((prev) => nextRandomNote(notePool, prev))
-  }, [clearPendingAdvance, notePool])
+    if (gameMode === 'preview') {
+      setBatchIndex((prevIndex) => {
+        const nextIndex = prevIndex + 1
+        if (nextIndex >= BATCH_SIZE) {
+          setQueue(createQueue(notePool, BATCH_SIZE))
+          return 0
+        }
+        return nextIndex
+      })
+      return
+    }
+    setBatchIndex(0)
+    setQueue(createQueue(notePool, BATCH_SIZE))
+  }, [clearPendingAdvance, gameMode, notePool])
 
   useEffect(() => {
     clearPendingAdvance()
     setAnswer({ state: 'idle' })
-    setCurrent(randomFrom(notePool))
-  }, [clearPendingAdvance, notePool])
+    setBatchIndex(0)
+    setQueue(createQueue(notePool, BATCH_SIZE))
+  }, [clearPendingAdvance, notePool, gameMode])
 
   const handlePlay = useCallback(async () => {
     setIsPlaying(true)
     try {
-      await playTone(noteToFrequencyHz(current))
+      await playTone(noteToFrequencyHz(currentNote))
     } finally {
       setIsPlaying(false)
     }
-  }, [current])
+  }, [currentNote])
 
   const handleGuess = useCallback(
     async (letter: NaturalNoteLetter) => {
       if (answer.state !== 'idle') return
 
-      const correct = current.letter
+      const correct = currentLetter
       setTotalCount((n) => n + 1)
 
       if (letter === correct) {
@@ -118,7 +148,7 @@ export function NoteGame() {
         advance()
       }, 650)
     },
-    [advance, answer.state, current.letter],
+    [advance, answer.state, currentLetter],
   )
 
   const resultText = useMemo(() => {
@@ -159,6 +189,14 @@ export function NoteGame() {
           </label>
 
           <label className="selectLabel">
+            モード
+            <select className="select" value={gameMode} onChange={(e) => setGameMode(e.target.value as GameMode)}>
+              <option value="single">通常</option>
+              <option value="preview">5音先読み</option>
+            </select>
+          </label>
+
+          <label className="selectLabel">
             表示
             <select
               className="select"
@@ -177,17 +215,24 @@ export function NoteGame() {
       </div>
 
       <div className="gameMain">
-        <StaffNote note={current} clef={clef} />
+        <StaffNote
+          clef={clef}
+          notes={gameMode === 'preview' ? queue : [currentNote]}
+          activeIndex={gameMode === 'preview' ? batchIndex : 0}
+        />
 
         <div className="prompt">
           <div className="promptTitle">この音符はどれ？</div>
-          <div className="promptHint">範囲: {RANGE_LABELS[clef]}</div>
+          <div className="promptHint">
+            範囲: {RANGE_LABELS[clef]}
+            {gameMode === 'preview' ? ' / 5音答えたら次の5音へ' : ''}
+          </div>
         </div>
 
         <div className="choices" role="group" aria-label="解答">
-          {NOTE_LETTERS.map((letter) => {
+          {ANSWER_BUTTONS.map((letter, index) => {
             const disabled = answer.state !== 'idle'
-            const isCorrect = answer.state !== 'idle' && letter === current.letter
+            const isCorrect = answer.state !== 'idle' && letter === currentLetter
             const isChosen = answer.state !== 'idle' && 'chosen' in answer && answer.chosen === letter
 
             const className = [
@@ -200,7 +245,7 @@ export function NoteGame() {
 
             return (
               <button
-                key={letter}
+                key={`${letter}-${index}`}
                 type="button"
                 className={className}
                 onClick={() => void handleGuess(letter)}
@@ -229,7 +274,8 @@ export function NoteGame() {
               setCorrectCount(0)
               setTotalCount(0)
               setStreak(0)
-              setCurrent(randomFrom(notePool))
+              setBatchIndex(0)
+              setQueue(createQueue(notePool, BATCH_SIZE))
             }}
           >
             リセット

@@ -2,8 +2,9 @@ import type { Clef, Note } from './notes'
 import './note-game.css'
 
 type Props = {
-  note: Note
   clef: Clef
+  notes: readonly Note[]
+  activeIndex?: number
 }
 
 const DIATONIC_LETTER_INDEX: Record<Note['letter'], number> = {
@@ -59,8 +60,63 @@ const CLEF_LABEL: Record<Clef, string> = {
   bass: 'ヘ音記号',
 }
 
-export function StaffNote({ note, clef }: Props) {
-  const width = 320
+function renderNoteGlyph(
+  note: Note,
+  referenceBottomLine: Note,
+  bottomLineY: number,
+  positionStep: number,
+  noteX: number,
+  opacity: number,
+  keyId: string,
+) {
+  const y = staffYForClef(note, referenceBottomLine, bottomLineY, positionStep)
+  const distance = diatonicDistanceFromBottomLine(note, referenceBottomLine)
+  const ledgerDistances = ledgerLineDistances(distance)
+  const stemDown = distance >= 4
+
+  return (
+    <g key={keyId} opacity={opacity}>
+      {ledgerDistances.map((d) => {
+        const yLine = bottomLineY - d * positionStep
+        return (
+          <line
+            key={`${noteX}-${d}`}
+            x1={noteX - 26}
+            y1={yLine}
+            x2={noteX + 26}
+            y2={yLine}
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity="0.9"
+          />
+        )
+      })}
+
+      <ellipse
+        cx={noteX}
+        cy={y}
+        rx="14"
+        ry="10"
+        fill="currentColor"
+        transform={`rotate(-18 ${noteX} ${y})`}
+      />
+
+      <line
+        x1={stemDown ? noteX - 12 : noteX + 12}
+        y1={y}
+        x2={stemDown ? noteX - 12 : noteX + 12}
+        y2={stemDown ? y + 46 : y - 46}
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </g>
+  )
+}
+
+export function StaffNote({ clef, notes, activeIndex = 0 }: Props) {
+  const width = 460
   const height = 220
   const staffLeft = 24
   const staffRight = width - 24
@@ -69,12 +125,8 @@ export function StaffNote({ note, clef }: Props) {
   const positionStep = lineGap / 2
   const bottomLineY = 150
   const referenceBottomLine = CLEF_BOTTOM_LINE[clef]
-  const noteX = (staffLeft + staffRight) / 2 + 20
-
-  const y = staffYForClef(note, referenceBottomLine, bottomLineY, positionStep)
-  const distance = diatonicDistanceFromBottomLine(note, referenceBottomLine)
-  const ledgerDistances = ledgerLineDistances(distance)
-  const stemDown = distance >= 4
+  const currentNoteX = notes.length > 1 ? 118 : 210
+  const noteSpacing = 58
 
   return (
     <div className="staffCard" aria-label="譜面">
@@ -108,44 +160,17 @@ export function StaffNote({ note, clef }: Props) {
           )
         })}
 
-        {/* ledger lines (if needed) */}
-        {ledgerDistances.map((d) => {
-          const yLine = bottomLineY - d * positionStep
-          return (
-            <line
-              key={d}
-              x1={noteX - 26}
-              y1={yLine}
-              x2={noteX + 26}
-              y2={yLine}
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              opacity="0.9"
-            />
-          )
-        })}
-
-        {/* note head */}
-        <ellipse
-          cx={noteX}
-          cy={y}
-          rx="14"
-          ry="10"
-          fill="currentColor"
-          transform={`rotate(-18 ${noteX} ${y})`}
-        />
-
-        {/* stem (simple) */}
-        <line
-          x1={stemDown ? noteX - 12 : noteX + 12}
-          y1={y}
-          x2={stemDown ? noteX - 12 : noteX + 12}
-          y2={stemDown ? y + 46 : y - 46}
-          stroke="currentColor"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
+        {notes.map((note, index) =>
+          renderNoteGlyph(
+            note,
+            referenceBottomLine,
+            bottomLineY,
+            positionStep,
+            currentNoteX + noteSpacing * index,
+            index === activeIndex ? 1 : index < activeIndex ? 0.18 : 0.35,
+            `note-${index}`,
+          ),
+        )}
       </svg>
     </div>
   )

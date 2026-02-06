@@ -89,10 +89,13 @@
   border: 1px solid #d6e3f3;
   background: #ffffff;
   padding: 14px;
+  width: min(100%, 500px);
 }
 
 .staffSvg {
   display: block;
+  width: 100%;
+  height: auto;
 }
 
 .prompt {
@@ -126,6 +129,7 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: 600;
+  min-width: 0;
 }
 
 .choiceButton:disabled {
@@ -176,5 +180,11 @@
 
   .choices {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .choices {
+    grid-template-columns: 1fr;
   }
 }

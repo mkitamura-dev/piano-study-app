@@ -1,0 +1,180 @@
+.game {
+  width: min(880px, calc(100vw - 32px));
+  margin: 0 auto;
+  border: 1px solid #d1dff0;
+  background: rgba(255, 255, 255, 0.86);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 16px 36px rgba(52, 84, 120, 0.16);
+}
+
+.gameTop {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat {
+  border: 1px solid #dae6f4;
+  background: #f8fbff;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.statLabel {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.statValue {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.selectLabel {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.select {
+  border-radius: 10px;
+  border: 1px solid #cfdced;
+  background: #ffffff;
+  padding: 8px 10px;
+  color: inherit;
+}
+
+.secondaryButton {
+  border-radius: 12px;
+  border: 1px solid #bed2ea;
+  background: #eaf4ff;
+  padding: 10px 12px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.secondaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.gameMain {
+  margin-top: 14px;
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+}
+
+.staffCard {
+  border-radius: 16px;
+  border: 1px solid #d6e3f3;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.staffSvg {
+  display: block;
+}
+
+.prompt {
+  text-align: center;
+}
+
+.promptTitle {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.promptHint {
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.choices {
+  width: min(720px, 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.choiceButton {
+  border-radius: 14px;
+  border: 1px solid #c8d8ec;
+  background: #f2f8ff;
+  padding: 12px 12px;
+  color: inherit;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.choiceButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.choiceCorrect {
+  border-color: rgba(80, 200, 120, 0.6);
+  background: rgba(80, 200, 120, 0.16);
+}
+
+.choiceWrong {
+  border-color: rgba(255, 90, 90, 0.6);
+  background: rgba(255, 90, 90, 0.14);
+}
+
+.result {
+  min-height: 22px;
+  font-weight: 700;
+}
+
+.footerButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ghostButton {
+  border-radius: 12px;
+  border: 1px solid #c8d8ec;
+  background: #f4f9ff;
+  padding: 10px 12px;
+  color: inherit;
+  cursor: pointer;
+}
+
+@media (min-width: 720px) {
+  .gameTop {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+
+  .controls {
+    justify-content: flex-end;
+  }
+
+  .choices {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

@@ -19,3 +19,26 @@
   font-size: 14px;
   opacity: 0.75;
 }
+
+.pageNav {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+}
+
+.pageLink {
+  display: inline-block;
+  border: 1px solid #c8d8ec;
+  background: #f4f9ff;
+  color: inherit;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pageLinkActive {
+  background: #dceeff;
+  border-color: #a9c6e8;
+}

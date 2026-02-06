@@ -92,6 +92,70 @@
   width: min(100%, 500px);
 }
 
+.symbolCard {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.symbolLabel {
+  font-size: 15px;
+  opacity: 0.8;
+}
+
+.symbolGlyph {
+  font-size: clamp(48px, 12vw, 80px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.symbolListCard {
+  width: min(100%, 760px);
+  padding: 20px;
+}
+
+.symbolListTitle {
+  margin: 0;
+  font-size: 22px;
+}
+
+.symbolListSubtitle {
+  margin: 8px 0 16px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.symbolTableWrap {
+  overflow-x: auto;
+}
+
+.symbolTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+
+.symbolTable th,
+.symbolTable td {
+  border: 1px solid #d5e2f2;
+  padding: 10px 12px;
+  text-align: left;
+  background: #ffffff;
+}
+
+.symbolTable th {
+  background: #eef5ff;
+  font-size: 14px;
+}
+
+.symbolCell {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .staffSvg {
   display: block;
   width: 100%;

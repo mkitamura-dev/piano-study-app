@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { NoteGame } from './note-game/NoteGame'
+import { RhythmHandsGame } from './rhythm-game/RhythmHandsGame'
 import { SymbolGame } from './symbol-game/SymbolGame'
 import { SymbolListPage } from './symbol-game/SymbolListPage'
 
-type Page = 'notes' | 'symbols' | 'symbols-list'
+type Page = 'notes' | 'rhythm-hands' | 'symbols' | 'symbols-list'
 
 function parseHashToPage(hash: string): Page {
+  if (hash === '#/rhythm-hands') return 'rhythm-hands'
   if (hash === '#/symbols-list') return 'symbols-list'
   return hash === '#/symbols' ? 'symbols' : 'notes'
 }
@@ -26,6 +28,8 @@ function App() {
     () =>
       page === 'notes'
         ? 'ピアノの音符あてゲーム'
+        : page === 'rhythm-hands'
+          ? '左右別リズム同時トレーニング'
         : page === 'symbols'
           ? 'ピアノの音楽記号あてゲーム'
           : 'ピアノの音楽記号一覧',
@@ -36,6 +40,8 @@ function App() {
     () =>
       page === 'notes'
         ? '譜面の音符（＋音）を見て、正しい音名を当てよう'
+        : page === 'rhythm-hands'
+          ? '左手と右手で異なるリズムを同時に叩いて、独立性を鍛えよう'
         : page === 'symbols'
           ? '楽譜で使う記号を見て、意味を当てよう'
           : '記号あてゲームで使う問題を一覧で確認できます',
@@ -51,6 +57,9 @@ function App() {
           <a className={page === 'notes' ? 'pageLink pageLinkActive' : 'pageLink'} href="#/notes">
             音符あて
           </a>
+          <a className={page === 'rhythm-hands' ? 'pageLink pageLinkActive' : 'pageLink'} href="#/rhythm-hands">
+            左右リズム
+          </a>
           <a className={page === 'symbols' ? 'pageLink pageLinkActive' : 'pageLink'} href="#/symbols">
             記号あて
           </a>
@@ -60,7 +69,15 @@ function App() {
         </nav>
       </header>
 
-      {page === 'notes' ? <NoteGame /> : page === 'symbols' ? <SymbolGame /> : <SymbolListPage />}
+      {page === 'notes' ? (
+        <NoteGame />
+      ) : page === 'rhythm-hands' ? (
+        <RhythmHandsGame />
+      ) : page === 'symbols' ? (
+        <SymbolGame />
+      ) : (
+        <SymbolListPage />
+      )}
     </main>
   )
 }

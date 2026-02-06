@@ -47,12 +47,13 @@ CloudFront の `Custom error response` で以下を設定してください。
 
 GitHub Secrets を作成してください。
 
-- `AWS_ROLE_TO_ASSUME`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 - `AWS_REGION`
 - `S3_BUCKET_NAME`
 - `CLOUDFRONT_DISTRIBUTION_ID`
 
-### 4. GitHub OIDC用 IAMロール作成
+### 4. (任意) GitHub OIDC用 IAMロール作成
 
 テンプレート:
 
